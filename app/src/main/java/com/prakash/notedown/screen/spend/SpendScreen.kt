@@ -1,5 +1,6 @@
 package com.prakash.notedown.screen.spend
 
+import android.app.Application
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,23 +13,32 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.prakash.notedown.data.local.entity.SpendEntry
 import androidx.compose.foundation.lazy.items
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 
 
 @Composable
-fun SpendScreen(viewModel: SpendViewModel = viewModel()) {
+fun SpendScreen() {
+	val context = LocalContext.current
+	val viewModel: SpendViewModel = viewModel(
+		factory = SpendViewModelFactory(context.applicationContext as Application)
+	)
 	var amount by remember { mutableStateOf("") }
 	var description by remember { mutableStateOf("")}
 
-	val spendList by viewModel.spendList.collectAsState()
+	val spendList by viewModel.todaySpend.collectAsState()
+
 
 	Column (
 		modifier = Modifier.padding(16.dp)
@@ -56,8 +66,13 @@ fun SpendScreen(viewModel: SpendViewModel = viewModel()) {
 
 		Button(
 			onClick = {
-				if (amount.isNotEmpty()){
-					viewModel.addSpendEntry(amount.toInt(),description)
+				val amountInt = amount.toIntOrNull()
+				if (amountInt != null && description.isNotBlank()){
+					val entry = SpendEntry(
+						amount = amountInt,
+						description = description
+					)
+					viewModel.addSpend(entry)
 					amount = ""
 					description = ""
 				}
@@ -74,13 +89,21 @@ fun SpendScreen(viewModel: SpendViewModel = viewModel()) {
 			style = MaterialTheme.typography.titleMedium
 		)
 
-		LazyColumn {
-			items(spendList){ item ->
-				Text("${item.amount} - ${item.description}")
-			}
+		spendList.forEach {
+			Text("• ₹${it.amount} on ${it.description}")
 		}
 
 	}
 
 
+}
+
+class SpendViewModelFactory(private val application: Application) : ViewModelProvider.Factory {
+	override fun <T : ViewModel> create(modelClass: Class<T>): T {
+		if (modelClass.isAssignableFrom(SpendViewModel::class.java)) {
+			@Suppress("UNCHECKED_CAST")
+			return SpendViewModel(application) as T
+		}
+		throw IllegalArgumentException("Unknown ViewModel class")
+	}
 }
