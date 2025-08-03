@@ -22,31 +22,31 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.prakash.notedown.data.local.entity.CaloriesEntry
 import com.prakash.notedown.screen.activities.ActivitiesViewModel
 import com.prakash.notedown.screen.calories.CaloriesViewModel
 import com.prakash.notedown.screen.spend.SpendViewModel
+import java.util.Map.entry
+import com.prakash.notedown.screen.calories.CaloriesScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-	activitiesViewModel: ActivitiesViewModel,
-	spendViewModel: SpendViewModel,
-	caloriesViewModel: CaloriesViewModel,
-	showSheet: MutableState<Boolean>,) {
-	if (showSheet.value) {
-		BackHandler {
-			showSheet.value = false
-		}
-	}
+//	activitiesViewModel: ActivitiesViewModel,
+//	spendViewModel: SpendViewModel,
+//	caloriesViewModel: CaloriesViewModel, showSheet: MutableState<Boolean>,
+	) {
+
+//	if (showSheet.value) {
+//		BackHandler {
+//			showSheet.value = false
+//		}
+//	}
 
 	Scaffold(
 		topBar = {
-			if (!showSheet.value){
 				TopAppBar(
 					title = { Text ( text = "My Journaling")},
 					actions = {
@@ -57,18 +57,18 @@ fun HomeScreen(
 						}
 					}
 				)
-			}
+
 
 		},
-		floatingActionButton = {
-			if (!showSheet.value){
-				FloatingActionButton(
-					onClick = { showSheet.value = true }){
-					Icon(Icons.Default.Add,contentDescription = "Add")
-				}
-			}
-
-		}
+//		floatingActionButton = {
+//			if (!showSheet.value){
+//				FloatingActionButton(
+//					onClick = { showSheet.value = true }){
+//					Icon(Icons.Default.Add,contentDescription = "Add")
+//				}
+//			}
+//
+//		}
 	) { innerPadding ->
 		Column (
 			modifier = Modifier
@@ -82,17 +82,17 @@ fun HomeScreen(
 			OverViewCardRow()
 			DailyLogList()
 		}
-		if (showSheet.value){
-			UnifiedEntryBottomSheet(
-				onDismiss = {showSheet.value = false},
-				onAdd = { spend, calories, activities ->
-					if (spend != null) spendViewModel.addSpendEntry(spend.first,spend.second)
-					if (calories != null) caloriesViewModel.addFood(calories.second,calories.first)
-					if (activities != null) activitiesViewModel.addActivity(activities.first,activities.second,activities.third)
-					showSheet.value = false
-				}
-			)
-		}
+//		if (showSheet.value){
+//			UnifiedEntryBottomSheet(
+//				onDismiss = {showSheet.value = false},
+//				onAdd = { spend, calories, activities ->
+//					if (spend != null) spendViewModel.addSpendEntry(spend.first,spend.second)
+//					if (calories != null) caloriesViewModel.addCalories(entry = CaloriesEntry()
+//					if (activities != null) activitiesViewModel.addActivity(activities.first,activities.second,activities.third)
+//					showSheet.value = false
+//				}
+//			)
+//		}
 
 	}
 	

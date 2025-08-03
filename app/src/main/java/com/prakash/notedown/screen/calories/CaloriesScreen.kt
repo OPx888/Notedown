@@ -20,14 +20,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.prakash.notedown.data.local.entity.CaloriesEntry
+import kotlinx.coroutines.flow.combine
 
 
 @Composable
-fun CaloriesScreen(viewModel: CaloriesViewModel = viewModel () ) {
+fun CaloriesScreen(viewModel: CaloriesViewModel = viewModel() ) {
+
+	val caloriesList by viewModel.allCalories.collectAsState()
+
 	var foodName by remember { mutableStateOf("") }
 	var foodGrams by remember { mutableStateOf("") }
 
-	val foodLog by viewModel.foodLog.collectAsState()
 
 	Column(modifier = Modifier.padding(16.dp)) {
 		Text(
@@ -53,11 +57,19 @@ fun CaloriesScreen(viewModel: CaloriesViewModel = viewModel () ) {
 
 		Button(
 			onClick = {
-				if (foodName.isNotBlank() && foodGrams.isNotBlank()){
-					viewModel.addFood(foodName,foodGrams.toInt())
+				   val g = foodGrams.toIntOrNull() ?: 0
+					val entry = CaloriesEntry(
+						foodName = foodName,
+						grams = g,
+						calories = g*4,
+						protein = g* 1,
+						carbs = g* 2,
+						fat = g*1,
+
+						)
+					viewModel.addCalories(entry)
 					foodName = ""
 					foodGrams = ""
-				}
 			}
 		) {
 			Text("Add")
@@ -70,12 +82,15 @@ fun CaloriesScreen(viewModel: CaloriesViewModel = viewModel () ) {
 			style = MaterialTheme.typography.titleMedium
 		)
 		LazyColumn {
-			items(foodLog){ item ->
-				Text("${item.name} - ${item.grams}g")
+			items(caloriesList){ item ->
+				Text("${item.foodName} - ${item.grams}g")
 			}
 		}
 
+
 	}
+
+
 
 
 

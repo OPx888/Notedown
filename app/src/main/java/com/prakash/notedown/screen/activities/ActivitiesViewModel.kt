@@ -1,17 +1,36 @@
 package com.prakash.notedown.screen.activities
 
-import androidx.lifecycle.ViewModel
-import com.prakash.notedown.screen.activities.model.ActivityLog
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.prakash.notedown.data.local.AppDatabase
+import com.prakash.notedown.data.local.entity.ActivityEntry
+import com.prakash.notedown.data.local.repository.ActivityRepository
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-class ActivitiesViewModel : ViewModel() {
+class ActivitiesViewModel(application: Application) : AndroidViewModel(application) {
 
-	private val _activityLog = MutableStateFlow<List<ActivityLog>>(emptyList())
-	val activityLog : StateFlow<List<ActivityLog>> = _activityLog
+	private val dao = AppDatabase.getDatabase(application).activitiesDao()
+	private val repository = ActivityRepository(dao)
 
-	fun addActivity(label : String, startTime : String, endTime : String){
-		val newActivity = ActivityLog(label,startTime,endTime)
-		_activityLog.value = _activityLog.value + newActivity
+	private val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+
+	val todayActivity = repository.getDate(today).stateIn(
+		viewModelScope,
+		SharingStarted.WhileSubscribed(),
+		emptyList()
+	)
+
+	fun addActivity(entry : ActivityEntry) = viewModelScope.launch {
+		repository.insert(entry)
+	}
+
+	fun deleteActivity(entry: ActivityEntry) = viewModelScope.launch {
+		repository.delete(entry)
 	}
 }
