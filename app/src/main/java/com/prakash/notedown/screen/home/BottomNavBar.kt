@@ -1,4 +1,4 @@
-package com.prakash.notedown.screen
+package com.prakash.notedown.screen.home
 
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
